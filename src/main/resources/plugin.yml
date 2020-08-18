@@ -1,0 +1,5 @@
+name: PerWorInventory
+version: ${project.version}
+main: devansh.perworinventory.perworinventory
+api-version: 1.16
+authors: [Devansh]
