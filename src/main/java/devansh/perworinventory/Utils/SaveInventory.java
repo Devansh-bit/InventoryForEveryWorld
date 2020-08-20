@@ -1,6 +1,7 @@
 package devansh.perworinventory.Utils;
 
 import devansh.perworinventory.perworinventory;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
@@ -9,9 +10,7 @@ import org.bukkit.util.io.BukkitObjectOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
 
 public class SaveInventory {
     private perworinventory plugin;
@@ -66,5 +65,23 @@ public class SaveInventory {
             }
         }
         return Items;
+    }
+    public static void addInventoryToHashMap(Player player, perworinventory plugin){
+        String items = SaveInventory.storeItems(Arrays.asList(player.getInventory().getContents()));
+        if (plugin.playerWorldHashMap.containsKey(player.getUniqueId().toString())){
+           HashMap playerhashmap =  plugin.playerWorldHashMap.get(player.getUniqueId().toString());
+           if(playerhashmap.containsKey(player.getWorld().getName())) {
+               playerhashmap.replace(player.getWorld().getName(), items);
+           }
+           else{
+               playerhashmap.put(player.getWorld().getName(), items);
+           }
+           plugin.playerWorldHashMap.replace(player.getUniqueId().toString(), playerhashmap);
+        }
+        else{
+            HashMap<String, String> playerhashmap = new HashMap<>();
+            playerhashmap.put(player.getWorld().getName(), items);
+            plugin.playerWorldHashMap.put(player.getUniqueId().toString(), playerhashmap);
+        }
     }
 }
