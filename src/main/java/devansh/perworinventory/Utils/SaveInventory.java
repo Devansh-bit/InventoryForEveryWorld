@@ -1,8 +1,12 @@
 package devansh.perworinventory.Utils;
 
 import devansh.perworinventory.perworinventory;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.inventory.InventoryInteractEvent;
+import org.bukkit.event.inventory.InventoryPickupItemEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
@@ -35,12 +39,12 @@ public class SaveInventory {
                 encodedItems = Base64.getEncoder().encodeToString(rawData);
             }
         }catch (IOException e){
-
+            System.out.println("Error Saving Player Inventory, Retrying!");
         }
         return encodedItems;
     }
-
-    public static ArrayList<ItemStack> decodeItems(String encodedItems){
+    
+    public static ItemStack[] decodeItems(String encodedItems){
         ArrayList<ItemStack> Items = new ArrayList<>();
 
 
@@ -64,24 +68,26 @@ public class SaveInventory {
                 e.printStackTrace();
             }
         }
-        return Items;
+        ItemStack[] stack = Items.toArray(new ItemStack[Items.size()]);
+        return stack;
     }
-    public static void addInventoryToHashMap(Player player, perworinventory plugin){
-        String items = SaveInventory.storeItems(Arrays.asList(player.getInventory().getContents()));
-        if (plugin.playerWorldHashMap.containsKey(player.getUniqueId().toString())){
-           HashMap playerhashmap =  plugin.playerWorldHashMap.get(player.getUniqueId().toString());
-           if(playerhashmap.containsKey(player.getWorld().getName())) {
-               playerhashmap.replace(player.getWorld().getName(), items);
-           }
-           else{
-               playerhashmap.put(player.getWorld().getName(), items);
-           }
-           plugin.playerWorldHashMap.replace(player.getUniqueId().toString(), playerhashmap);
-        }
-        else{
-            HashMap<String, String> playerhashmap = new HashMap<>();
-            playerhashmap.put(player.getWorld().getName(), items);
-            plugin.playerWorldHashMap.put(player.getUniqueId().toString(), playerhashmap);
-        }
+
+    public static void addToWorldList(Player player, perworinventory plugin){
+      String currentWorldInv =  SaveInventory.storeItems(Arrays.asList(player.getInventory().getContents()));
+      if(plugin.playerWorldHashMap.containsKey(player.getUniqueId().toString())){
+          ArrayList prevWorldList = plugin.playerWorldHashMap.get(player.getUniqueId().toString());
+          prevWorldList.set(plugin.worldList.indexOf(player.getWorld().getName()),currentWorldInv);
+          plugin.playerWorldHashMap.replace(player.getUniqueId().toString(),prevWorldList);
+          player.sendMessage("h169");
+      }
+      else{
+          ArrayList<String> prevWorldList = new ArrayList<>();
+          for(int i = 0; i<plugin.worldList.size();i++) {
+              prevWorldList.add("");
+          }
+          prevWorldList.set(plugin.worldList.indexOf(player.getWorld().getName()),currentWorldInv);
+          plugin.playerWorldHashMap.put(player.getUniqueId().toString(),prevWorldList);
+          player.sendMessage("hi70");
+      }
     }
 }
